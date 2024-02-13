@@ -10,3 +10,10 @@ public abstract class WinningLogic {
     public abstract bool CheckForWin(TileState[,] board);
     public abstract bool CheckForTie(TileState[,] board);
 }
+
+public enum TileState
+{
+    Empty,
+    PlayerX,
+    PlayerO
+}
