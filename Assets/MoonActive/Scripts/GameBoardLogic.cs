@@ -9,12 +9,12 @@ public class GameBoardLogic
     private readonly GameView gameView;
     private readonly UserActionEvents userActionEvents;
 
-    private StateSaver gameStateSaver;
+    private StateSaver saverInMemory;
+    private StateSaver saverPlayerPref;
+    private WinningLogic winningLogic;
 
     private PlayerType currentPlayer;
     private TileState[,] board;
-    private PlayerType savedPlayer;
-    private TileState[,] savedBoard;
 
     private int rows;
     private int cols;
@@ -29,7 +29,9 @@ public class GameBoardLogic
     {
         this.rows = rows;
         this.cols = columns;
-        this.gameStateSaver = new GameStateSaver(rows, cols);
+        this.saverInMemory = new InMemorySaver(rows, cols);
+        this.saverPlayerPref = new PlayerPrefSaver(rows, cols);
+        this.winningLogic = new GameWinningLogic(rows, cols);
         userActionEvents.StartGameClicked += HandleStartGameClicked;
     }
 
@@ -67,18 +69,22 @@ public class GameBoardLogic
         Debug.Log("Load clicked");
         if(source == GameStateSource.InMemory)
         {
-            gameView.StartGame(savedPlayer);
-            LoadBoard(savedBoard);
+            RestartGameAndLoadBoard(saverInMemory);
         }
-        else if(source == GameStateSource.PlayerPrefs) {
-            gameView.StartGame(savedPlayer);
-            LoadBoard(gameStateSaver.LoadBoardState());
+        else if(source == GameStateSource.PlayerPrefs) 
+        {
+            RestartGameAndLoadBoard(saverPlayerPref);
         }
+    }
+
+    private void RestartGameAndLoadBoard(StateSaver saver) {
+        gameView.StartGame(saver.savedPlayer);
+        saver.savedPlayer = currentPlayer;
+        LoadBoard(saver.LoadBoardState());
     }
 
     private void LoadBoard(TileState[,] boardToLoad)
     {
-        currentPlayer = savedPlayer;
         board = new TileState[rows, cols];
         for (int row = 0; row < rows; row++)
         {
@@ -100,33 +106,20 @@ public class GameBoardLogic
 
     private void SaveClicked(GameStateSource source)
     {
-        Debug.Log("Save clicked");
-        if(source == GameStateSource.InMemory)
+        switch(source) 
         {
-            SaveBoardInMemory();
-        }
-        else if(source == GameStateSource.PlayerPrefs)
-        {
-            SaveBoadInPlayerPref();
-        }
-    }
-
-    private void SaveBoardInMemory()
-    {
-        savedPlayer = currentPlayer;
-        savedBoard = new TileState[rows, cols];
-        for (int row = 0; row < rows; row++)
-        {
-            for (int col = 0; col < cols; col++)
-            {
-                savedBoard[row, col] = board[row, col];
-            }
+            case GameStateSource.InMemory:
+                SaveBoard(saverInMemory);
+            break;
+            case GameStateSource.PlayerPrefs:
+                SaveBoard(saverPlayerPref);
+            break;
         }
     }
 
-    private void SaveBoadInPlayerPref() {
-        savedPlayer = currentPlayer;
-        gameStateSaver.SaveBoardState(board);
+    private void SaveBoard(StateSaver saver) {
+        saver.savedPlayer = currentPlayer;
+        saver.SaveBoardState(board);
     }
 
     private void HandleTileClicked(BoardTilePosition boardTilePosition)
@@ -169,48 +162,12 @@ public class GameBoardLogic
 
     private bool CheckForWin()
     {
-        // Check rows, columns, and diagonals in a single loop
-        for (int i = 0; i < rows; i++)
-        {
-            // Check rows and columns
-            if ((board[i, 0] != TileState.Empty && AreTilesEqual(i, 0, i, 1) && AreTilesEqual(i, 1, i, 2)) ||
-                (board[0, i] != TileState.Empty && AreTilesEqual(0, i, 1, i) && AreTilesEqual(1, i, 2, i)))
-            {
-                return true;
-            }
-        }
-
-        // Check diagonals
-        if ((board[0, 0] != TileState.Empty && AreTilesEqual(0, 0, 1, 1) && AreTilesEqual(1, 1, 2, 2)) ||
-            (board[0, cols - 1] != TileState.Empty && AreTilesEqual(0, cols - 1, 1, 1) && AreTilesEqual(1, 1, 2, 0)))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private bool AreTilesEqual(int row1, int col1, int row2, int col2)
-    {
-        return board[row1, col1] == board[row2, col2];
+       return winningLogic.CheckForWin(board);
     }
 
     private bool CheckForTie()
     {
-        // Check if any empty tile is found
-        for (int row = 0; row < rows; row++)
-        {
-            for (int col = 0; col < cols; col++)
-            {
-                if (board[row, col] == TileState.Empty)
-                {
-                    return false; // If any empty tile found, the game is not a tie
-                }
-            }
-        }
-
-        // If no empty tiles found, it's a tie
-        return true;
+       return winningLogic.CheckForTie(board);
     }
 
 }

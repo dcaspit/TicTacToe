@@ -1,25 +1,19 @@
 using MoonActive.Scripts;
 using UnityEngine;
 
-public interface StateSaver {
-    public abstract void SaveBoardState(TileState[,] board);
-    public abstract TileState[,] LoadBoardState();
-}
-
-
-public class GameStateSaver : StateSaver
+public class PlayerPrefSaver : StateSaver
 {
 
     private const string PlayerPrefsKey = "TicTacToeBoard";
     private int rows;
     private int cols;
 
-    public GameStateSaver(int rows, int cols){
+    public PlayerPrefSaver(int rows, int cols){
         this.rows = rows;
         this.cols = cols;
     }
 
-    public void SaveBoardState(TileState[,] board)
+    public override void SaveBoardState(TileState[,] board)
     {
         // Convert the 2D array to a string for storage
         string serializedBoard = SerializeBoard(board);
@@ -28,7 +22,7 @@ public class GameStateSaver : StateSaver
         PlayerPrefs.SetString(PlayerPrefsKey, serializedBoard);
     }
 
-    public TileState[,] LoadBoardState()
+    public override TileState[,] LoadBoardState()
     {
         // Load the serialized board state from PlayerPrefs
         string serializedBoard = PlayerPrefs.GetString(PlayerPrefsKey, string.Empty);
