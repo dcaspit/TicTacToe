@@ -24,7 +24,6 @@ namespace MoonActive.Scripts
         
         public void OnStartGameClicked()
         {
-            Debug.Log("Start game clicked");
             _boardEvents.OnStartGameClicked();
         }
     

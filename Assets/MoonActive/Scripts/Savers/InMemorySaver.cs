@@ -12,11 +12,12 @@ public class InMemorySaver : StateSaver
     {
         this.rows = rows;
         this.cols = cols;
+        this.savedBoard = new TileState[rows, cols];
     }
 
     public override TileState[,] LoadBoardState()
     {
-        throw new System.NotImplementedException();
+        return savedBoard;
     }
 
     public override void SaveBoardState(TileState[,] board)

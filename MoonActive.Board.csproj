@@ -47,6 +47,7 @@
      <Compile Include="Assets/MoonActive/Scripts/LogicDefinitions.cs" />
      <Compile Include="Assets/MoonActive/Scripts/Savers/InMemorySaver.cs" />
      <Compile Include="Assets/MoonActive/Scripts/GameWinningLogic.cs" />
+     <Compile Include="Assets/MoonActive/Scripts/Savers/GameStateSaver.cs" />
      <None Include="Assets/MoonActive/Scripts/MoonActive.Board.asmdef" />
     <Reference Include="UnityEngine">
         <HintPath>/Applications/Unity/Unity.app/Contents/Managed/UnityEngine/UnityEngine.dll</HintPath>
