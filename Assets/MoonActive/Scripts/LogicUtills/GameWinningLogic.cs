@@ -40,7 +40,7 @@ class GameWinningLogic : WinningLogic
             counter = 0;
             for(int col = 0; col < cols; col++)
             {
-                // if at least one tile is empty not need continue checking this row
+                // if at least one tile is empty, continue to next row
                 if (board[row, col] == TileState.Empty) break; 
 
                 if (board[row, col] == currentPlayer) counter++;

@@ -1,6 +1,9 @@
+using MoonActive.Scripts;
+
 public class InMemorySaver : StateSaver
 {
     private TileState[,] _savedBoard;
+    private PlayerType _savedPlayer;
     private readonly int _rows;
     private readonly int _cols;
 
@@ -9,6 +12,7 @@ public class InMemorySaver : StateSaver
         _rows = rows;
         _cols = cols;
         _savedBoard = new TileState[rows, cols];
+        _savedPlayer = PlayerType.PlayerX;
     }
 
     public override TileState[,] LoadBoardState()
@@ -26,5 +30,15 @@ public class InMemorySaver : StateSaver
                 _savedBoard[row, col] = board[row, col];
             }
         }
+    }
+
+    public override void SavePlayerState(PlayerType currentPlayer)
+    {
+        _savedPlayer = currentPlayer;
+    }
+
+    public override PlayerType LoadPlayerState()
+    {
+        return _savedPlayer;
     }
 }

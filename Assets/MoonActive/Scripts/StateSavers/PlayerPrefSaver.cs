@@ -1,8 +1,10 @@
 using UnityEngine;
+using MoonActive.Scripts;
 
 public class PlayerPrefSaver : StateSaver
 {
     private const string PlayerPrefsKey = "TicTacToeBoard";
+    private const string PlayerKey = "TicTacToePlayer";
     private readonly int _rows;
     private readonly int _cols;
 
@@ -20,6 +22,13 @@ public class PlayerPrefSaver : StateSaver
         PlayerPrefs.SetString(PlayerPrefsKey, serializedBoard);
     }
 
+
+    public override void SavePlayerState(PlayerType currentPlayer)
+    {
+        // Save the player state to PlayerPrefs
+        PlayerPrefs.SetString(PlayerKey, currentPlayer.ToString());
+    }
+
     public override TileState[,] LoadBoardState()
     {
         // Load the serialized board state from PlayerPrefs
@@ -27,6 +36,25 @@ public class PlayerPrefSaver : StateSaver
 
         // If there's a saved state, deserialize and return it; otherwise, return a new board
         return string.IsNullOrEmpty(serializedBoard) ? new TileState[_rows, _cols] : DeserializeBoard(serializedBoard);
+    }
+
+    public override PlayerType LoadPlayerState()
+    {
+        // Load the player state from PlayerPrefs
+        string player = PlayerPrefs.GetString(PlayerKey, string.Empty);
+
+        return StringToPlayerType(player);
+    }
+
+    private PlayerType StringToPlayerType(string player)
+    {
+        if(player == PlayerType.PlayerO.ToString())
+        {
+            return PlayerType.PlayerO;
+        }
+
+        // Default of PlayerX, i assumed if there is no save, then load default mode.
+        return PlayerType.PlayerX;
     }
 
     private string SerializeBoard(TileState[,] board)

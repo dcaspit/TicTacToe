@@ -1,9 +1,10 @@
 using MoonActive.Scripts;
 
 public abstract class StateSaver {
-    public PlayerType savedPlayer;
     public abstract void SaveBoardState(TileState[,] board);
+    public abstract void SavePlayerState(PlayerType currentPlayer);
     public abstract TileState[,] LoadBoardState();
+    public abstract PlayerType LoadPlayerState();
 }
 
 public abstract class WinningLogic {

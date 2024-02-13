@@ -1,4 +1,5 @@
 using MoonActive.Scripts;
+using UnityEngine;
 
 public class GameBoardLogic
 {
@@ -21,7 +22,7 @@ public class GameBoardLogic
     {
         _rows = rows;
         _cols = columns;
-        _gameStateSaver = new GameStateSaver(rows, _cols);
+        _gameStateSaver = new GameStateSaver(_rows, _cols);
         _winningLogic = new GameWinningLogic();
         _userActionEvents.StartGameClicked += HandleStartGameClicked;
     }
@@ -43,7 +44,6 @@ public class GameBoardLogic
 
     private void InitializeBoard()
     {
-        // allocating only on first initialization
         _board = new TileState[_rows, _cols];
         for (int row = 0; row < _rows; row++)
         {
@@ -60,9 +60,10 @@ public class GameBoardLogic
         StateSaver stateSaver = _gameStateSaver.getSaverBy(source);
 
         // Restart Game with saved player
-        _gameView.StartGame(stateSaver.savedPlayer);
-        stateSaver.savedPlayer = _currentPlayer;
+        _currentPlayer = stateSaver.LoadPlayerState();
 
+        Debug.Log("Loaded: " + _currentPlayer.ToString());
+        _gameView.StartGame(_currentPlayer);
         LoadBoard(stateSaver.LoadBoardState());
     }
 
@@ -97,7 +98,8 @@ public class GameBoardLogic
 
     private void SaveBoard(StateSaver saver) 
     {
-        saver.savedPlayer = _currentPlayer;
+        Debug.Log("Saved: " + _currentPlayer.ToString());
+        saver.SavePlayerState(_currentPlayer);
         saver.SaveBoardState(_board);
     }
 
