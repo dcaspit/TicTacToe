@@ -2,16 +2,19 @@ using MoonActive.Scripts;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UIElements;
+using log4net.Core;
 
 public class GameBoardLogic
 {
     private readonly GameView gameView;
     private readonly UserActionEvents userActionEvents;
 
+    private StateSaver gameStateSaver;
+
     private PlayerType currentPlayer;
     private TileState[,] board;
     private PlayerType savedPlayer;
-    private TileState[,] inMemoryBoard;
+    private TileState[,] savedBoard;
 
     private int rows;
     private int cols;
@@ -26,6 +29,7 @@ public class GameBoardLogic
     {
         this.rows = rows;
         this.cols = columns;
+        this.gameStateSaver = new GameStateSaver(rows, cols);
         userActionEvents.StartGameClicked += HandleStartGameClicked;
     }
 
@@ -46,13 +50,29 @@ public class GameBoardLogic
         gameView.StartGame(currentPlayer);
     }
 
+    private void InitializeBoard()
+    {
+        board = new TileState[rows, cols];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                board[row, col] = TileState.Empty;
+            }
+        }
+    }
+
     private void LoadClicked(GameStateSource source)
     {
         Debug.Log("Load clicked");
         if(source == GameStateSource.InMemory)
         {
             gameView.StartGame(savedPlayer);
-            LoadBoard(inMemoryBoard);
+            LoadBoard(savedBoard);
+        }
+        else if(source == GameStateSource.PlayerPrefs) {
+            gameView.StartGame(savedPlayer);
+            LoadBoard(gameStateSaver.LoadBoardState());
         }
     }
 
@@ -65,7 +85,8 @@ public class GameBoardLogic
             for (int col = 0; col < cols; col++)
             {
                 TileState state = boardToLoad[row, col];
-                if(state != TileState.Empty) {
+                if(state != TileState.Empty) 
+                {
                     SetTileSign(GetPlayerTypeFrom(state), new BoardTilePosition(row, col));
                 }
             }
@@ -82,28 +103,30 @@ public class GameBoardLogic
         Debug.Log("Save clicked");
         if(source == GameStateSource.InMemory)
         {
-            savedPlayer = currentPlayer;
-            inMemoryBoard = new TileState[rows, cols];
-            for (int row = 0; row < rows; row++)
-            {
-                for (int col = 0; col < cols; col++)
-                {
-                    inMemoryBoard[row, col] = board[row, col];
-                }
-            }
+            SaveBoardInMemory();
+        }
+        else if(source == GameStateSource.PlayerPrefs)
+        {
+            SaveBoadInPlayerPref();
         }
     }
 
-    private void InitializeBoard()
+    private void SaveBoardInMemory()
     {
-        board = new TileState[rows, cols];
+        savedPlayer = currentPlayer;
+        savedBoard = new TileState[rows, cols];
         for (int row = 0; row < rows; row++)
         {
             for (int col = 0; col < cols; col++)
             {
-                board[row, col] = TileState.Empty;
+                savedBoard[row, col] = board[row, col];
             }
         }
+    }
+
+    private void SaveBoadInPlayerPref() {
+        savedPlayer = currentPlayer;
+        gameStateSaver.SaveBoardState(board);
     }
 
     private void HandleTileClicked(BoardTilePosition boardTilePosition)
