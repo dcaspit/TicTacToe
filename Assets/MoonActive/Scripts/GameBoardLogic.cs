@@ -1,6 +1,7 @@
 using MoonActive.Scripts;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UIElements;
 
 public class GameBoardLogic
 {
@@ -9,6 +10,7 @@ public class GameBoardLogic
 
     private PlayerType currentPlayer;
     private TileState[,] board;
+    private PlayerType savedPlayer;
     private TileState[,] inMemoryBoard;
 
     private int rows;
@@ -37,16 +39,58 @@ public class GameBoardLogic
     {
         userActionEvents.TileClicked += HandleTileClicked;
         userActionEvents.SaveStateClicked += SaveClicked;
+        userActionEvents.LoadStateClicked += LoadClicked;
+
         InitializeBoard();
         currentPlayer = PlayerType.PlayerX;
         gameView.StartGame(currentPlayer);
     }
 
-    private void SaveClicked(GameStateSource source)
+    private void LoadClicked(GameStateSource source)
     {
+        Debug.Log("Load clicked");
         if(source == GameStateSource.InMemory)
         {
-            inMemoryBoard = board;
+            gameView.StartGame(savedPlayer);
+            LoadBoard(inMemoryBoard);
+        }
+    }
+
+    private void LoadBoard(TileState[,] boardToLoad)
+    {
+        currentPlayer = savedPlayer;
+        board = new TileState[rows, cols];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                TileState state = boardToLoad[row, col];
+                if(state != TileState.Empty) {
+                    SetTileSign(GetPlayerTypeFrom(state), new BoardTilePosition(row, col));
+                }
+            }
+        }
+    }
+
+    public PlayerType GetPlayerTypeFrom(TileState state) {
+        if(state == TileState.PlayerX) return PlayerType.PlayerX;
+        return PlayerType.PlayerO;
+    }
+
+    private void SaveClicked(GameStateSource source)
+    {
+        Debug.Log("Save clicked");
+        if(source == GameStateSource.InMemory)
+        {
+            savedPlayer = currentPlayer;
+            inMemoryBoard = new TileState[rows, cols];
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < cols; col++)
+                {
+                    inMemoryBoard[row, col] = board[row, col];
+                }
+            }
         }
     }
 
@@ -67,7 +111,6 @@ public class GameBoardLogic
         if (IsValidMove(boardTilePosition))
         {
             SetTileSign(currentPlayer, boardTilePosition);
-            gameView.SetTileSign(currentPlayer, boardTilePosition);
 
             if (CheckForWin())
             {

@@ -1,18 +1,15 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonActive.Board", "MoonActive.Board.csproj", "{0F4F9E69-815F-D2ED-A5E0-1ACA3B95D72F}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonActive.Board", "MoonActive.Board.csproj", "{699e4f0f-5f81-edd2-a5e0-1aca3b95d72f}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0F4F9E69-815F-D2ED-A5E0-1ACA3B95D72F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F4F9E69-815F-D2ED-A5E0-1ACA3B95D72F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F4F9E69-815F-D2ED-A5E0-1ACA3B95D72F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0F4F9E69-815F-D2ED-A5E0-1ACA3B95D72F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{699e4f0f-5f81-edd2-a5e0-1aca3b95d72f}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{699e4f0f-5f81-edd2-a5e0-1aca3b95d72f}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
