@@ -61,8 +61,6 @@ public class GameBoardLogic
 
         // Restart Game with saved player
         _currentPlayer = stateSaver.LoadPlayerState();
-
-        Debug.Log("Loaded: " + _currentPlayer.ToString());
         _gameView.StartGame(_currentPlayer);
         LoadBoard(stateSaver.LoadBoardState());
     }
@@ -98,7 +96,6 @@ public class GameBoardLogic
 
     private void SaveBoard(StateSaver saver) 
     {
-        Debug.Log("Saved: " + _currentPlayer.ToString());
         saver.SavePlayerState(_currentPlayer);
         saver.SaveBoardState(_board);
     }
@@ -111,13 +108,13 @@ public class GameBoardLogic
 
         if (CheckForWin())
         {
-            _gameView.GameWon(_currentPlayer);
             RemoveGameListeners();
+            _gameView.GameWon(_currentPlayer);
         }
         else if (CheckForTie())
         {
-            _gameView.GameTie();
             RemoveGameListeners();
+            _gameView.GameTie();
         }
         else
         {
