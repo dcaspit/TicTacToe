@@ -7,7 +7,7 @@ public abstract class StateSaver {
 }
 
 public abstract class WinningLogic {
-    public abstract bool CheckForWin(TileState[,] board);
+    public abstract bool CheckForWin(TileState[,] board, PlayerType player);
     public abstract bool CheckForTie(TileState[,] board);
 }
 

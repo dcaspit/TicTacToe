@@ -22,7 +22,7 @@ public class GameBoardLogic
         _rows = rows;
         _cols = columns;
         _gameStateSaver = new GameStateSaver(rows, _cols);
-        _winningLogic = new GameWinningLogic(rows, _cols);
+        _winningLogic = new GameWinningLogic();
         _userActionEvents.StartGameClicked += HandleStartGameClicked;
     }
 
@@ -142,7 +142,7 @@ public class GameBoardLogic
 
     private bool CheckForWin()
     {
-       return _winningLogic.CheckForWin(_board);
+       return _winningLogic.CheckForWin(_board, _currentPlayer);
     }
 
     private bool CheckForTie()
