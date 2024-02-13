@@ -1,16 +1,14 @@
-using MoonActive.Scripts;
 using UnityEngine;
 
 public class PlayerPrefSaver : StateSaver
 {
-
     private const string PlayerPrefsKey = "TicTacToeBoard";
-    private int rows;
-    private int cols;
+    private readonly int _rows;
+    private readonly int _cols;
 
     public PlayerPrefSaver(int rows, int cols){
-        this.rows = rows;
-        this.cols = cols;
+        _rows = rows;
+        _cols = cols;
     }
 
     public override void SaveBoardState(TileState[,] board)
@@ -28,7 +26,7 @@ public class PlayerPrefSaver : StateSaver
         string serializedBoard = PlayerPrefs.GetString(PlayerPrefsKey, string.Empty);
 
         // If there's a saved state, deserialize and return it; otherwise, return a new board
-        return string.IsNullOrEmpty(serializedBoard) ? new TileState[rows, cols] : DeserializeBoard(serializedBoard);
+        return string.IsNullOrEmpty(serializedBoard) ? new TileState[_rows, _cols] : DeserializeBoard(serializedBoard);
     }
 
     private string SerializeBoard(TileState[,] board)
@@ -58,7 +56,7 @@ public class PlayerPrefSaver : StateSaver
         // Deserialize the board state from the string
         string[] tileValues = serializedBoard.Split(',');
 
-        TileState[,] deserializedBoard = new TileState[rows, cols];
+        TileState[,] deserializedBoard = new TileState[_rows, _cols];
 
         int index = 0;
         for (int row = 0; row < deserializedBoard.GetLength(0); row++)

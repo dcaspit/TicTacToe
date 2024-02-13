@@ -22,7 +22,6 @@ public class BoardView : GameView
         
         ResetBoard();
         _startGameButton.SetActive(true);
-        Debug.Log("Start button is active");
     }
 
     private void ResetBoard()

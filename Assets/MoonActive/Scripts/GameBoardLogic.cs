@@ -1,95 +1,78 @@
 using MoonActive.Scripts;
-using UnityEngine;
 
 public class GameBoardLogic
 {
-    private readonly GameView gameView;
-    private readonly UserActionEvents userActionEvents;
-    private GameStateSaver gameStateSaver;
-    private WinningLogic winningLogic;
-    private PlayerType currentPlayer;
-    private TileState[,] board;
-    private int rows;
-    private int cols;
+    private readonly GameView _gameView;
+    private readonly UserActionEvents _userActionEvents;
+    private GameStateSaver _gameStateSaver;
+    private WinningLogic _winningLogic;
+    private PlayerType _currentPlayer;
+    private TileState[,] _board;
+    private int _rows;
+    private int _cols;
 
     public GameBoardLogic(GameView gameView, UserActionEvents userActionEvents)
     {
-        this.gameView = gameView;
-        this.userActionEvents = userActionEvents;
+        _gameView = gameView;
+        _userActionEvents = userActionEvents;
     }
 
     public void Initialize(int columns, int rows)
     {
-        this.rows = rows;
-        this.cols = columns;
-        this.gameStateSaver = new GameStateSaver(rows, cols);
-        this.winningLogic = new GameWinningLogic(rows, cols);
-        userActionEvents.StartGameClicked += HandleStartGameClicked;
-    }
-
-    public void DeInitialize()
-    {
-        this.rows = -1;
-        this.cols = -1;
-        this.gameStateSaver = null;
-        this.winningLogic = null;
-        this.board = null;
-        removeAllListeners();
-    }
-
-    private void removeAllListeners() 
-    {
-        userActionEvents.StartGameClicked -= HandleStartGameClicked;
-        removeGameListeners();
-    }
-
-    private void removeGameListeners()
-    {
-        userActionEvents.TileClicked -= HandleTileClicked;
-        userActionEvents.SaveStateClicked -= SaveClicked;
-        userActionEvents.LoadStateClicked -= LoadClicked;
+        _rows = rows;
+        _cols = columns;
+        _gameStateSaver = new GameStateSaver(rows, _cols);
+        _winningLogic = new GameWinningLogic(rows, _cols);
+        _userActionEvents.StartGameClicked += HandleStartGameClicked;
     }
 
     private void HandleStartGameClicked()
     {
-        userActionEvents.TileClicked += HandleTileClicked;
-        userActionEvents.SaveStateClicked += SaveClicked;
-        userActionEvents.LoadStateClicked += LoadClicked;
-
+        AddGameListeners();
         InitializeBoard();
-        currentPlayer = PlayerType.PlayerX;
-        gameView.StartGame(currentPlayer);
+        _currentPlayer = PlayerType.PlayerX;
+        _gameView.StartGame(_currentPlayer);
+    }
+
+    private void AddGameListeners() 
+    {
+        _userActionEvents.TileClicked += HandleTileClicked;
+        _userActionEvents.SaveStateClicked += HandleSaveClicked;
+        _userActionEvents.LoadStateClicked += HandleLoadClicked;
     }
 
     private void InitializeBoard()
     {
-        board = new TileState[rows, cols];
-        for (int row = 0; row < rows; row++)
+        // allocating only on first initialization
+        _board = new TileState[_rows, _cols];
+        for (int row = 0; row < _rows; row++)
         {
-            for (int col = 0; col < cols; col++)
+            for (int col = 0; col < _cols; col++)
             {
-                board[row, col] = TileState.Empty;
+                _board[row, col] = TileState.Empty;
             }
         }
     }
 
-    private void LoadClicked(GameStateSource source)
+    private void HandleLoadClicked(GameStateSource source)
     {
-        RestartGameAndLoadBoard(gameStateSaver.getSaverBy(source));
-    }
+        // Get State Saver logic implementation
+        StateSaver stateSaver = _gameStateSaver.getSaverBy(source);
 
-    private void RestartGameAndLoadBoard(StateSaver saver) {
-        gameView.StartGame(saver.savedPlayer);
-        saver.savedPlayer = currentPlayer;
-        LoadBoard(saver.LoadBoardState());
+        // Restart Game with saved player
+        _gameView.StartGame(stateSaver.savedPlayer);
+        stateSaver.savedPlayer = _currentPlayer;
+
+        LoadBoard(stateSaver.LoadBoardState());
     }
 
     private void LoadBoard(TileState[,] boardToLoad)
     {
-        board = new TileState[rows, cols];
-        for (int row = 0; row < rows; row++)
+        // Reset the board 
+        _board = new TileState[_rows, _cols];
+        for (int row = 0; row < _rows; row++)
         {
-            for (int col = 0; col < cols; col++)
+            for (int col = 0; col < _cols; col++)
             {
                 TileState state = boardToLoad[row, col];
                 if(state != TileState.Empty) 
@@ -100,36 +83,39 @@ public class GameBoardLogic
         }
     }
 
-    public PlayerType GetPlayerTypeFrom(TileState state) {
+    public PlayerType GetPlayerTypeFrom(TileState state) 
+    {
+        // Function assumes TileState is not empty;
         if(state == TileState.PlayerX) return PlayerType.PlayerX;
         return PlayerType.PlayerO;
     }
 
-    private void SaveClicked(GameStateSource source)
+    private void HandleSaveClicked(GameStateSource source)
     {
-        SaveBoard(gameStateSaver.getSaverBy(source));
+        SaveBoard(_gameStateSaver.getSaverBy(source));
     }
 
-    private void SaveBoard(StateSaver saver) {
-        saver.savedPlayer = currentPlayer;
-        saver.SaveBoardState(board);
+    private void SaveBoard(StateSaver saver) 
+    {
+        saver.savedPlayer = _currentPlayer;
+        saver.SaveBoardState(_board);
     }
 
     private void HandleTileClicked(BoardTilePosition boardTilePosition)
     {
         if (NotValidMove(boardTilePosition)) return;
         
-        SetTileSign(currentPlayer, boardTilePosition);
+        SetTileSign(_currentPlayer, boardTilePosition);
 
         if (CheckForWin())
         {
-            gameView.GameWon(currentPlayer);
-            removeGameListeners();
+            _gameView.GameWon(_currentPlayer);
+            RemoveGameListeners();
         }
         else if (CheckForTie())
         {
-            gameView.GameTie();
-            removeGameListeners();
+            _gameView.GameTie();
+            RemoveGameListeners();
         }
         else
         {
@@ -139,29 +125,52 @@ public class GameBoardLogic
 
     private bool NotValidMove(BoardTilePosition tilePosition)
     {
-        return board[tilePosition.Row, tilePosition.Column] != TileState.Empty;
+        return _board[tilePosition.Row, tilePosition.Column] != TileState.Empty;
     }
 
     private void SetTileSign(PlayerType player, BoardTilePosition tilePosition)
     {
-        board[tilePosition.Row, tilePosition.Column] = (player == PlayerType.PlayerX) ? TileState.PlayerX : TileState.PlayerO;
-        gameView.SetTileSign(player, tilePosition);
+        _board[tilePosition.Row, tilePosition.Column] = (player == PlayerType.PlayerX) ? TileState.PlayerX : TileState.PlayerO;
+        _gameView.SetTileSign(player, tilePosition);
     }
 
     private void ChangeTurn()
     {
-        currentPlayer = (currentPlayer == PlayerType.PlayerX) ? PlayerType.PlayerO : PlayerType.PlayerX;
-        gameView.ChangeTurn(currentPlayer);
+        _currentPlayer = (_currentPlayer == PlayerType.PlayerX) ? PlayerType.PlayerO : PlayerType.PlayerX;
+        _gameView.ChangeTurn(_currentPlayer);
     }
 
     private bool CheckForWin()
     {
-       return winningLogic.CheckForWin(board);
+       return _winningLogic.CheckForWin(_board);
     }
 
     private bool CheckForTie()
     {
-       return winningLogic.CheckForTie(board);
+       return _winningLogic.CheckForTie(_board);
+    }
+
+    public void DeInitialize()
+    {
+        this._rows = -1;
+        this._cols = -1;
+        this._gameStateSaver = null;
+        this._winningLogic = null;
+        this._board = null;
+        RemoveAllListeners();
+    }
+
+    private void RemoveAllListeners() 
+    {
+        _userActionEvents.StartGameClicked -= HandleStartGameClicked;
+        RemoveGameListeners();
+    }
+
+    private void RemoveGameListeners()
+    {
+        _userActionEvents.TileClicked -= HandleTileClicked;
+        _userActionEvents.SaveStateClicked -= HandleSaveClicked;
+        _userActionEvents.LoadStateClicked -= HandleLoadClicked;
     }
 
 }
